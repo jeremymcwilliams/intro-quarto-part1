@@ -1,0 +1,254 @@
+---
+title: "Intro to Quarto"
+author: "Jeremy McWilliams"
+format: html
+editor: visual
+---
+
+## What is Quarto?
+
+Quarto is software that creates outputs (web pages, pdfs, dashboards, slides, books, etc.) allowing you to communicate your coding projects to your audience. Quarto works with:
+
+-   R
+
+-   Python
+
+-   Julia
+
+-   ObservableJS
+
+Typically you do your work in one or more `.qmd` (Quarto Markdown) documents, and then you render your `.qmd` file(s) into your selected outputs. It's generally a good idea to try something, render, evaluate the output, and repeat.
+
+Click the Render button above, so we can see the unedited output of this file.
+
+Let's look at the very top of this file. The section between the opening and closing `---` is called the YAML header (YAML: Yet Another Markup Language). This section includes important metadata, and includes configuration options for your Quarto file. Both the `title` and `author` field values display at the top of the rendered document, and the `format` field determines the type of output.
+
+**Your Task:**
+
+Make the following changes to the YAML header:
+
+-   change the title to "All about Penguins"
+
+-   change the author to your name
+
+-   change the format to pdf
+
+Now save and Render. What is different?
+
+Specific formats can also have their own configuration rules. All the possibilities for html are listed [here](https://quarto.org/docs/output-formats/html-basics.html){target="_blank"}. For now, edit the YAML header again, so the format section looks like this:
+
+``` yaml
+format: 
+  html: 
+    toc: true
+```
+
+Render your file. Notice that there is now a table of contents section in your document, containing anchor links to section headers. Also, notice the indentations in the YAML header. It is very picky about indentations and spaces, so referring to documentation is a good idea.
+
+## R Markdown
+
+Quarto documents are typically a mix of formatted text, code, and outputs from code. R Markdown is what allows you to create the formatted text. For example, a hyperlink in R Markdown looks like this:
+
+```         
+I love [Watzek Library](https:library.lclark.edu).
+```
+
+The above translates to:
+
+I love [Watzek Library](https://library.lclark.edu).
+
+In the Files window, there's a file titled rmarkdown.pdf. This provides syntax and examples for various R Markdown outputs.
+
+It's important to note that the raw R Markdown code is visible in the "Source" editor. The purpose of the Visual editor is to basically create the R Markdown for the author. There can be occasions where the Visual editor doesn't give you exactly what you want, so you may need to toggle to the Source editor to address an issue.
+
+**Your task:**
+
+Open the rmarkdown.pdf cheat sheet, and toggle to the Source editor in this document. Write some R Markdown code below to display the image penguins.jpg, and give it a caption "Baby Penguins".
+
+## Code Chunks
+
+Just like in `.Rmd` files, Quarto documents have code chunks, where code is executed. Here's a basic example:
+
+```{r}
+#assigns the value
+myVariable<-"popcorn"
+
+#prints to screen
+myVariable
+
+```
+
+When the document is rendered, each code chunk is executed.
+
+By default, a rendered output will show both the code chunk, plus any output from running the code. You can change this behavior by using one or more of Quarto's [execution options](https://quarto.org/docs/computations/execution-options.html){target="_blank"}. Take a look at the chunk below:
+
+```{r}
+#| echo: false
+
+
+plot(mtcars)
+
+
+
+```
+
+In the rendered document, the plot appears, but the code chunk does not.
+
+One of Quarto's aims is to support multiple languages. Below is a python code chunk, which will run as long as the `reticulate` R package is installed:
+
+```{python}
+
+fruits = ["apple", "banana", "cherry"]
+for x in fruits:
+  print(x)
+
+
+```
+
+**Your Task:**
+
+Create a code chunk below that displays code in the rendered output, but *does not execute the code* in the rendered output. Feel free to write your own code, or use samples from [here](https://allisonhorst.github.io/palmerpenguins/articles/examples.html){target="_blank"}.
+
+## Working with R Packages
+
+When performing any kind of analysis in R, you'll often want to rely on the use of packages. Typically the sequence of events for installing and using a package in R is:
+
+`install.packages("tidyverse")`
+
+`library(tidyverse)`
+
+In Quarto, you don't necessarily have to have `install.packages` in a code chunk in your Quarto document. As long as the package has already been installed in your environment (e.g. via the console), you should be fine.
+
+The same isn't true for the `library` function - if you're using functions from an external package in your Quarto file, you must use the `library` function in a code chunk:
+
+```{r}
+#| warning: false
+# the execution option above prevents the tidyverse conflicts warning from being rendered
+
+library(tidyverse)
+library(palmerpenguins)
+library(rsconnect)
+
+
+```
+
+**Your Task:**
+
+Try commenting out the library commands in the code chunk above, and render the document. What happens?
+
+## Miscellaneous Tricks
+
+#### Figure Referencing
+
+Quarto has a number of options for working with plots. You can add references to figures using this syntax:
+
+@fig-flipperHist displays the distribution of flipper lengths among the sampled penguin data.
+
+```{r}
+#| label: fig-flipperHist
+#| fig-cap: Distribution of Flipper Lengths
+#| warning: false
+
+ggplot(data=penguins, mapping=aes(x=flipper_length_mm))+
+  geom_histogram()+
+  labs(x="")
+
+
+
+```
+
+**Your Task:**
+
+Referencing the plot below, add a line of text that references the plot, and add a code chunk option to match it (this will result in the plot being referenced as "Figure 2"). Also provide a caption.
+
+```{r}
+#| warning: false
+
+ggplot(data=penguins, mapping=aes(x=bill_length_mm, y=bill_depth_mm, color=species))+
+  geom_point()+
+  geom_smooth(method = "lm")+
+  labs(x="Bill Length (mm)", 
+       y="Bill Depth (mm)", 
+       title="Bill Depth vs. Bill Length by Species in Palmer Penguins")
+```
+
+#### Inline code
+
+There may be times when you want to have dynamic values included in your markdown text. You can do this by defining variables in code chunks, and then including them within markdown text:
+
+```{r}
+
+minMass<-min(penguins$body_mass_g, na.rm=TRUE)
+
+maxMassKg<-max(penguins$body_mass_g, na.rm=TRUE)/1000
+
+
+#below, the format is `{r} minMass` and `{r} maxMassKg`
+#backticks are needed!
+
+```
+
+The lightest penguin is `{r} minMass` grams. The heaviest penguin is `{r} maxMassKg` kilograms .
+
+**Your Task:**
+
+Create a code chunk that defines a variable `meanBillLength`, assigning it the value of the [average](https://www.rdocumentation.org/packages/base/versions/3.6.2/topics/mean){target="_blank"} `bill_length_mm` from the `penguins` data set. The write a sentence below that incorporates the variable you created, and render the document. How did it go?
+
+#### Tabs
+
+Tabs can be a nice way to group items together. In Quarto, this is a case where working in the Source editor is a better option. The syntax for tabs is shown below:
+
+``` markdown
+
+::: panel-tabset
+
+## Tab 1
+tab one content
+
+## Tab 2
+tab 2 content
+
+## Tab 3
+tab 3 content
+
+
+:::
+```
+
+The tabs don't appear in the visual editor, but will once the document is rendered. Render the document, and take a look:
+
+::: panel-tabset
+## Tab 1
+
+tab one content
+
+## Tab 2
+
+tab 2 content
+
+## Tab 3
+
+tab 3 content
+:::
+
+**Your turn:**
+
+In the Source editor, create a block of 3 tabs. In each tab, include the code for creating a ggplot visualization found [here](https://www.kaggle.com/code/joannakwame/exploring-the-palmer-penguins-dataset-with-ggplot2){target="_blank"}.
+
+## Publishing
+
+Often authors will want to publish results to a web platform, so they can share results with stakeholders. GitHub Pages is a common way to publish Quarto rendered documents, though setup is a little more complicated ([more here](https://quarto.org/docs/publishing/github-pages.html){target="_blank"}). For today, let's try publishing to RPubs, which is a free website for publishing Quarto outputs:
+
+-   Go to RPubs, and create an account: <https://rpubs.com/users/new>
+
+-   Render your current document.
+
+-   Click the blue Publish icon (next to Run), and select Publish to RPubs.
+
+-   You may have to authenticate with RPubs, using your new account.
+
+-   RPubs should then load the rendered HTML document. The URL is a stable link, so you can share it with whomever.
+
+## More
+
+There's so much more you can do with Quarto....we've just scratched the surface. Visit [quarto.org](https://quarto.org/){target="_blank"} for more documentation, and try things! Also, reach out to Jeremy if you need help (jeremym\@lclark.edu).
